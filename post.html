@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post — theweft.net</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1a1814;
+      --paper: #f5f1ea;
+      --warm-mid: #8c7b6b;
+      --accent: #b85c2c;
+      --rule: #d4c9b8;
+      --serif: 'Libre Baskerville', Georgia, serif;
+      --mono: 'DM Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--serif);
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    header {
+      border-bottom: 1px solid var(--rule);
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: baseline;
+      gap: 2rem;
+    }
+
+    .site-name {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--warm-mid);
+      text-decoration: none;
+    }
+
+    .site-name:hover { color: var(--accent); }
+
+    nav { display: flex; gap: 1.5rem; margin-left: auto; }
+
+    nav a {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--warm-mid);
+      text-decoration: none;
+    }
+
+    nav a:hover { color: var(--ink); }
+
+    /* ── Post layout ── */
+    main {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 4rem 2rem 8rem;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--warm-mid);
+      text-decoration: none;
+      margin-bottom: 3rem;
+    }
+
+    .back-link:hover { color: var(--accent); }
+
+    /* ── Post header ── */
+    .post-header {
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .post-meta {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      color: var(--warm-mid);
+      margin-bottom: 1.25rem;
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      font-size: 2.1rem;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+
+    .post-excerpt-lede {
+      font-size: 1.1rem;
+      line-height: 1.7;
+      color: #5a5047;
+      font-style: italic;
+    }
+
+    /* ── Post body ── */
+    .post-body {
+      font-size: 1.05rem;
+      line-height: 1.8;
+    }
+
+    .post-body p { margin-bottom: 1.4em; }
+
+    .post-body h1,
+    .post-body h2,
+    .post-body h3 {
+      margin-top: 2.5em;
+      margin-bottom: 0.75em;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+    }
+
+    .post-body h2 { font-size: 1.4rem; }
+    .post-body h3 { font-size: 1.15rem; font-style: italic; font-weight: 400; }
+
+    .post-body ul,
+    .post-body ol {
+      margin: 0 0 1.4em 1.5em;
+    }
+
+    .post-body li { margin-bottom: 0.4em; }
+
+    .post-body blockquote {
+      border-left: 3px solid var(--accent);
+      margin: 2em 0;
+      padding: 0.75em 0 0.75em 1.5em;
+      font-style: italic;
+      color: #5a5047;
+    }
+
+    .post-body code {
+      font-family: var(--mono);
+      font-size: 0.85em;
+      background: #ebe5d8;
+      padding: 0.15em 0.35em;
+      border-radius: 2px;
+    }
+
+    .post-body pre {
+      background: var(--ink);
+      color: #e8e0d4;
+      padding: 1.5rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      margin: 1.5em 0;
+    }
+
+    .post-body pre code {
+      background: none;
+      padding: 0;
+      font-size: 0.8rem;
+      line-height: 1.6;
+    }
+
+    .post-body hr {
+      border: none;
+      border-top: 1px solid var(--rule);
+      margin: 3em 0;
+    }
+
+    .post-body a { color: var(--accent); }
+
+    /* ── Tags footer ── */
+    .post-footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--rule);
+    }
+
+    .tag-label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--warm-mid);
+      margin-bottom: 0.75rem;
+    }
+
+    .post-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+    .tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.5rem;
+      border: 1px solid var(--rule);
+      color: var(--warm-mid);
+      border-radius: 2px;
+    }
+
+    /* ── States ── */
+    .loading, .error {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--warm-mid);
+      padding: 3rem 0;
+      letter-spacing: 0.04em;
+    }
+
+    .error { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="site-name">theweft.net</a>
+  <nav>
+    <a href="/signals.html">Signals</a>
+    <a href="/blog.html">Writing</a>
+    <a href="/about.html">About</a>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="loading">Loading…</p>
+</main>
+
+<script>
+  const WORKER_URL = "https://notion-signals-proxy.256ysfqc5d.workers.dev";
+
+  function formatDate(dateStr) {
+    if (!dateStr) return "";
+    return new Date(dateStr).toLocaleDateString("en-GB", {
+      day: "numeric", month: "long", year: "numeric"
+    });
+  }
+
+  async function loadPost() {
+    const main = document.getElementById("main");
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get("slug");
+
+    if (!slug) {
+      main.innerHTML = `<p class="error">No post specified.</p>`;
+      return;
+    }
+
+    try {
+      const res = await fetch(`${WORKER_URL}/posts/${slug}`);
+      if (res.status === 404) throw new Error("Post not found");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const { post } = await res.json();
+
+      // Update page title
+      document.title = `${post.title} — theweft.net`;
+
+      main.innerHTML = `
+        <a href="/blog.html" class="back-link">← Writing</a>
+
+        <div class="post-header">
+          <div class="post-meta">
+            <span>${formatDate(post.published)}</span>
+            ${post.tags.length ? `<span>${post.tags.join(" · ")}</span>` : ""}
+          </div>
+          <h1>${post.title}</h1>
+          ${post.excerpt ? `<p class="post-excerpt-lede">${post.excerpt}</p>` : ""}
+        </div>
+
+        <div class="post-body">${post.body}</div>
+
+        ${post.tags.length ? `
+          <div class="post-footer">
+            <p class="tag-label">Filed under</p>
+            <div class="post-tags">
+              ${post.tags.map(t => `<span class="tag">${t}</span>`).join("")}
+            </div>
+          </div>
+        ` : ""}
+      `;
+
+    } catch (err) {
+      main.innerHTML = `
+        <a href="/blog.html" class="back-link">← Writing</a>
+        <p class="error">${err.message}</p>
+      `;
+    }
+  }
+
+  loadPost();
+</script>
+</body>
+</html>
