@@ -373,7 +373,7 @@
   </footer>
 
   <script>
-    const WORKER_URL = 'https://notion-signals-proxy.256ysfqc5d.workers.dev/';
+    const WORKER_URL = 'https://notion-signals-proxy.256ysfqc5d.workers.dev';
 
     const TAG_MAP = {
       'The semantic layer': 'semantic',
@@ -517,7 +517,7 @@
     // Fetch from Notion via Worker
     async function loadSignals() {
       try {
-        const res = await fetch(WORKER_URL);
+        const res = await fetch(`${WORKER_URL}/signals`);
         if (!res.ok) throw new Error('Worker responded with ' + res.status);
         const data = await res.json();
         renderSignals(data.results || []);
