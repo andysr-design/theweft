@@ -6,93 +6,108 @@
   <title>Post — theweft.net</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&display=swap" rel="stylesheet">
   <style>
     :root {
-      --ink: #1a1814;
-      --paper: #f5f1ea;
-      --warm-mid: #8c7b6b;
-      --accent: #b85c2c;
-      --rule: #d4c9b8;
-      --serif: 'Libre Baskerville', Georgia, serif;
-      --mono: 'DM Mono', monospace;
+      --bg: #f7f5f0;
+      --bg-card: #ffffff;
+      --text-primary: #1a1916;
+      --text-secondary: #6b6860;
+      --text-tertiary: #9e9c98;
+      --border: rgba(26,25,22,0.12);
+      --border-mid: rgba(26,25,22,0.2);
+      --display: 'Fraunces', Georgia, serif;
+      --mono: ui-monospace, 'Cascadia Code', Menlo, monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141412;
+        --bg-card: #1c1c1a;
+        --text-primary: #f0ede6;
+        --text-secondary: #9e9c98;
+        --text-tertiary: #6b6860;
+        --border: rgba(240,237,230,0.1);
+        --border-mid: rgba(240,237,230,0.18);
+      }
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    html { font-size: 16px; }
+
     body {
-      font-family: var(--serif);
-      background: var(--paper);
-      color: var(--ink);
+      font-family: var(--mono);
+      background: var(--bg);
+      color: var(--text-primary);
       min-height: 100vh;
     }
 
-    header {
-      border-bottom: 1px solid var(--rule);
+    .site-header {
+      border-bottom: 0.5px solid var(--border-mid);
       padding: 1.5rem 2rem;
       display: flex;
       align-items: baseline;
-      gap: 2rem;
+      justify-content: space-between;
+      gap: 1rem;
     }
 
     .site-name {
-      font-family: var(--mono);
-      font-size: 0.8rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--warm-mid);
+      font-family: var(--display);
+      font-weight: 300;
+      font-size: 18px;
+      color: var(--text-primary);
       text-decoration: none;
+      letter-spacing: -0.3px;
     }
 
-    .site-name:hover { color: var(--accent); }
+    .site-name:hover { color: var(--text-secondary); }
 
-    nav { display: flex; gap: 1.5rem; margin-left: auto; }
+    .site-nav { display: flex; gap: 1.5rem; }
 
-    nav a {
-      font-family: var(--mono);
-      font-size: 0.75rem;
+    .site-nav a {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      text-decoration: none;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: var(--warm-mid);
-      text-decoration: none;
+      transition: color 0.15s;
     }
 
-    nav a:hover { color: var(--ink); }
+    .site-nav a:hover { color: var(--text-primary); }
 
-    /* ── Post layout ── */
     main {
       max-width: 680px;
       margin: 0 auto;
-      padding: 4rem 2rem 8rem;
+      padding: 3rem 2rem 8rem;
     }
 
     .back-link {
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
-      font-family: var(--mono);
-      font-size: 0.7rem;
+      font-size: 11px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--warm-mid);
+      color: var(--text-tertiary);
       text-decoration: none;
       margin-bottom: 3rem;
+      transition: color 0.15s;
     }
 
-    .back-link:hover { color: var(--accent); }
+    .back-link:hover { color: var(--text-primary); }
 
-    /* ── Post header ── */
     .post-header {
       margin-bottom: 3rem;
       padding-bottom: 2rem;
-      border-bottom: 1px solid var(--rule);
+      border-bottom: 0.5px solid var(--border);
     }
 
     .post-meta {
-      font-family: var(--mono);
-      font-size: 0.7rem;
+      font-size: 10px;
       letter-spacing: 0.08em;
-      color: var(--warm-mid);
+      text-transform: uppercase;
+      color: var(--text-tertiary);
       margin-bottom: 1.25rem;
       display: flex;
       gap: 1.5rem;
@@ -100,66 +115,73 @@
     }
 
     h1 {
-      font-size: 2.1rem;
-      font-weight: 700;
-      line-height: 1.2;
-      letter-spacing: -0.02em;
+      font-family: var(--display);
+      font-size: 38px;
+      font-weight: 300;
+      line-height: 1.15;
+      letter-spacing: -1px;
+      color: var(--text-primary);
       margin-bottom: 1rem;
     }
 
     .post-excerpt-lede {
-      font-size: 1.1rem;
-      line-height: 1.7;
-      color: #5a5047;
+      font-family: var(--display);
+      font-size: 18px;
+      font-weight: 300;
       font-style: italic;
+      line-height: 1.6;
+      color: var(--text-secondary);
     }
 
     /* ── Post body ── */
     .post-body {
-      font-size: 1.05rem;
+      font-size: 16px;
       line-height: 1.8;
     }
 
     .post-body p { margin-bottom: 1.4em; }
 
-    .post-body h1,
     .post-body h2,
     .post-body h3 {
+      font-family: var(--display);
+      font-weight: 300;
       margin-top: 2.5em;
       margin-bottom: 0.75em;
       line-height: 1.25;
-      letter-spacing: -0.01em;
+      letter-spacing: -0.5px;
     }
 
-    .post-body h2 { font-size: 1.4rem; }
-    .post-body h3 { font-size: 1.15rem; font-style: italic; font-weight: 400; }
+    .post-body h2 { font-size: 26px; }
+    .post-body h3 { font-size: 20px; font-style: italic; }
 
     .post-body ul,
-    .post-body ol {
-      margin: 0 0 1.4em 1.5em;
-    }
+    .post-body ol { margin: 0 0 1.4em 1.5em; }
 
     .post-body li { margin-bottom: 0.4em; }
 
     .post-body blockquote {
-      border-left: 3px solid var(--accent);
+      border-left: 2px solid var(--border-mid);
       margin: 2em 0;
       padding: 0.75em 0 0.75em 1.5em;
+      font-family: var(--display);
       font-style: italic;
-      color: #5a5047;
+      font-size: 18px;
+      font-weight: 300;
+      color: var(--text-secondary);
     }
 
     .post-body code {
       font-family: var(--mono);
       font-size: 0.85em;
-      background: #ebe5d8;
+      background: var(--bg-card);
+      border: 0.5px solid var(--border-mid);
       padding: 0.15em 0.35em;
       border-radius: 2px;
     }
 
     .post-body pre {
-      background: var(--ink);
-      color: #e8e0d4;
+      background: var(--bg-card);
+      border: 0.5px solid var(--border-mid);
       padding: 1.5rem;
       border-radius: 4px;
       overflow-x: auto;
@@ -168,66 +190,83 @@
 
     .post-body pre code {
       background: none;
+      border: none;
       padding: 0;
-      font-size: 0.8rem;
+      font-size: 13px;
       line-height: 1.6;
     }
 
     .post-body hr {
       border: none;
-      border-top: 1px solid var(--rule);
+      border-top: 0.5px solid var(--border);
       margin: 3em 0;
     }
 
-    .post-body a { color: var(--accent); }
+    .post-body a {
+      color: var(--text-primary);
+      text-decoration: underline;
+      text-decoration-color: var(--border-mid);
+    }
 
-    /* ── Tags footer ── */
+    .post-body a:hover { text-decoration-color: var(--text-secondary); }
+
     .post-footer {
       margin-top: 4rem;
       padding-top: 2rem;
-      border-top: 1px solid var(--rule);
+      border-top: 0.5px solid var(--border);
     }
 
     .tag-label {
-      font-family: var(--mono);
-      font-size: 0.65rem;
+      font-size: 11px;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: var(--warm-mid);
+      color: var(--text-tertiary);
       margin-bottom: 0.75rem;
     }
 
     .post-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 
     .tag {
-      font-family: var(--mono);
-      font-size: 0.65rem;
+      font-size: 10px;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      padding: 0.2rem 0.5rem;
-      border: 1px solid var(--rule);
-      color: var(--warm-mid);
+      padding: 3px 8px;
+      border: 0.5px solid var(--border-mid);
+      color: var(--text-tertiary);
       border-radius: 2px;
     }
 
-    /* ── States ── */
     .loading, .error {
-      font-family: var(--mono);
-      font-size: 0.8rem;
-      color: var(--warm-mid);
+      font-size: 13px;
+      color: var(--text-tertiary);
       padding: 3rem 0;
       letter-spacing: 0.04em;
     }
 
-    .error { color: var(--accent); }
+    .site-footer {
+      border-top: 0.5px solid var(--border);
+      padding: 2rem;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 600px) {
+      .site-header { padding: 1rem; }
+      main { padding: 2rem 1rem 4rem; }
+      h1 { font-size: 28px; }
+      .site-nav { display: none; }
+    }
   </style>
 </head>
 <body>
 
-<header>
-  <a href="/" class="site-name">theweft.net</a>
-  <nav>
-    <a href="/signals.html">Signals</a>
+<header class="site-header">
+  <a href="/" class="site-name">the weft</a>
+  <nav class="site-nav">
+    <a href="/index.html">Signals</a>
     <a href="/blog.html">Writing</a>
     <a href="/about.html">About</a>
   </nav>
@@ -236,6 +275,10 @@
 <main id="main">
   <p class="loading">Loading…</p>
 </main>
+
+<footer class="site-footer">
+  theweft.net &mdash; content strategy &amp; public services
+</footer>
 
 <script>
   const WORKER_URL = "https://notion-signals-proxy.256ysfqc5d.workers.dev";
@@ -263,7 +306,6 @@
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { post } = await res.json();
 
-      // Update page title
       document.title = `${post.title} — theweft.net`;
 
       main.innerHTML = `
