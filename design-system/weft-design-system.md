@@ -1,7 +1,7 @@
-# The Weft — Design System v0.4
+# The Weft — Design System
 
 **Scope:** theweft.net and its projects.
-**Status:** Source of truth. The live site does not yet reflect it — build to this, not from what's there.
+**Status:** Source of truth — see Changelog below for version history. The live site does not yet reflect it — build to this, not from what's there.
 
 ## How to use this document
 
