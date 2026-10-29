@@ -1,46 +1,918 @@
-Plain Jane
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>Plain Jane — a rule-based writing editor</title>
+<style>
+  :root{
+    color-scheme:light;
+    --serif: Georgia, 'Times New Roman', serif;
+    --sans: Arial, Helvetica, sans-serif;
+    --paper:#EDEAE2;
+    --paper-dim:#E2DFD6;
+    --ink:#20241F;
+    --ink-soft:#454940;
+    --rule:#C9C4B6;
+    --red:#A8382C;
+    --amber:#B9791F;
+    --teal:#3E6459;
+    --teal-soft:#DDE6E1;
+    --adverb-bg:rgba(62,100,89,0.14);
+    --selection-bg:rgba(62,100,89,0.35);
+  }
 
-Helping you write in plain English
-☀
-Light
+  :root[data-theme="dark"]{
+    color-scheme:dark;
+    --paper:#1C1D19;
+    --paper-dim:#26271F;
+    --ink:#EDEAE2;
+    --ink-soft:#B3AFA3;
+    --rule:#3C3D34;
+    --red:#D9695B;
+    --amber:#D9A248;
+    --teal:#6FA396;
+    --teal-soft:#233029;
+    --adverb-bg:rgba(111,163,150,0.22);
+    --selection-bg:rgba(111,163,150,0.4);
+  }
 
-• 1.
+  body{ transition:background-color 0.15s ease, color 0.15s ease; }
+
+  *{box-sizing:border-box;}
+
+  .sr-only{
+    position:absolute;
+    width:1px;
+    height:1px;
+    padding:0;
+    margin:-1px;
+    overflow:hidden;
+    clip:rect(0,0,0,0);
+    white-space:nowrap;
+    border:0;
+  }
+
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    min-height:100vh;
+  }
+
+  .masthead{
+    border-bottom:1px solid var(--rule);
+    padding:22px 32px 16px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .masthead-right{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .title-flourish{
+    display:flex;
+    align-items:center;
+    gap:18px;
+  }
+  .masthead h1{
+    font-size:1.9rem;
+    font-weight:400;
+    letter-spacing:0.01em;
+    margin:0;
+  }
+  .squiggle{
+    width:54px;
+    height:34px;
+    flex-shrink:0;
+  }
+  .masthead .sub{
+    font-family:var(--sans);
+    font-size:0.8rem;
+    
+    letter-spacing:0.01em;
+    color:var(--ink-soft);
+  }
+
+  .layout{
+    display:grid;
+    grid-template-columns:1fr 360px;
+    gap:0;
+    align-items:start;
+  }
+  @media (max-width:820px){
+    .layout{grid-template-columns:1fr;}
+  }
+
+  .editor-wrap{
+    padding:40px clamp(24px, 5vw, 72px) 40px 32px;
+    border-right:1px solid var(--rule);
+    min-height:70vh;
+  }
+  @media (max-width:820px){
+    .editor-wrap{border-right:none; border-bottom:1px solid var(--rule);}
+  }
+
+  .format-toolbar{
+    display:inline-flex;
+    align-items:center;
+    gap:2px;
+    margin-bottom:40px;
+    padding:4px;
+    border:1px solid var(--rule);
+    border-radius:10px;
+    background:var(--paper-dim);
+    flex-wrap:wrap;
+    position:sticky;
+    top:12px;
+    z-index:20;
+    box-shadow:0 6px 14px -8px rgba(0,0,0,0.25);
+  }
+  .format-divider{
+    width:1px;
+    height:22px;
+    background:var(--rule);
+    margin:0 4px;
+  }
+  .format-btn{
+    font-family:var(--sans);
+    font-size:0.95rem;
+    color:var(--ink);
+    background:transparent;
+    border:1px solid transparent;
+    border-radius:7px;
+    width:34px;
+    height:34px;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    transition:background-color 0.1s ease;
+  }
+  .format-btn:hover{ background:var(--paper); }
+  .format-btn.active{ background:var(--teal-soft); color:var(--teal); }
+  .format-btn:focus-visible{
+    outline:2px solid var(--teal);
+    outline-offset:1px;
+  }
+
+  .editor-stack{
+    position:relative;
+    max-width:66ch;
+    min-height:50vh;
+  }
+  #editorInput, #editorHighlight{
+    position:absolute;
+    top:0; left:0;
+    width:100%;
+    min-height:50vh;
+    margin:0;
+    padding:0;
+    border:0;
+    font-family:var(--sans);
+    font-size:1.15rem;
+    line-height:1.55;
+    white-space:pre-wrap;
+    word-wrap:break-word;
+    overflow-wrap:break-word;
+  }
+  #editorInput{
+    position:relative;
+    background:transparent;
+    background-color:transparent;
+    color:transparent;
+    -webkit-text-fill-color:transparent;
+    caret-color:var(--red);
+    resize:none;
+    outline:none;
+    -webkit-appearance:none;
+    appearance:none;
+    z-index:2;
+    overflow:hidden;
+  }
+  #editorInput::placeholder{
+    color:var(--ink-soft);
+    -webkit-text-fill-color:var(--ink-soft);
+    opacity:1;
+  }
+  #editorInput::selection{
+    background:var(--selection-bg);
+  }
+  #editorInput::-moz-selection{
+    background:var(--selection-bg);
+  }
+  #editorHighlight{
+    z-index:1;
+    pointer-events:none;
+    color:var(--ink);
+  }
+
+  mark{ background:none; color:inherit; font:inherit; padding:0; margin:0; }
+  mark.hard{ background:transparent; border-bottom:2px solid var(--amber); }
+  mark.very-hard{ background:transparent; border-bottom:2px solid var(--red); }
+  mark.adverb{ background:var(--adverb-bg); border-radius:2px; }
+  mark.passive{ background:rgba(62,100,89,0.0); border-bottom:2px dotted var(--teal); }
+
+  /* Rendered markdown in the overlay. Font-size stays uniform with body text
+     everywhere — the invisible textarea underneath can't vary size per line,
+     so headings are distinguished by color/spacing only, never size. */
+  .md-h1{ color:var(--ink); letter-spacing:0.04em; }
+  .md-h2{ color:var(--ink-soft); letter-spacing:0.03em; }
+  .md-bullet{ color:var(--ink-soft); margin-right:2px; }
+  .md-link{ color:var(--teal); text-decoration:underline; text-decoration-style:dotted; text-underline-offset:2px; }
+  .md-code{ font-family:'Courier New', Courier, monospace; background:var(--paper-dim); border-radius:3px; padding:0 2px; }
+  .md-quote-mark{ color:var(--ink-soft); font-style:italic; }
+  .md-quote{ font-style:italic; color:var(--ink-soft); background:var(--adverb-bg); border-radius:2px; }
+  #editorHighlight strong{ font-weight:700; }
+  #editorHighlight em{ font-style:italic; }
+
+  .sidebar{
+    padding:32px 26px;
+    font-family:var(--sans);
+  }
+
+  .gauge{
+    position:relative;
+    width:100%;
+    aspect-ratio:2/1.1;
+    margin-bottom:6px;
+  }
+  @media (max-width:820px){
+    .gauge{ max-width:260px; margin-left:auto; margin-right:auto; }
+  }
+  .gauge svg{ width:100%; height:100%; }
+  .gauge-label{
+    text-align:center;
+    margin-top:-8px;
+  }
+  .gauge-grade{
+    font-family:var(--sans);
+    font-weight:400;
+    font-size:2.5rem;
+    line-height:1;
+  }
+  .gauge-caption{
+    font-size:0.9rem;
+    
+    letter-spacing:0.01em;
+    color:var(--ink-soft);
+    margin-top:4px;
+  }
+
+  .stat-row{
+    display:flex;
+    justify-content:space-between;
+    padding:9px 0;
+    border-bottom:1px solid var(--rule);
+    font-size:1rem;
+  }
+  .stat-row:last-child{ border-bottom:none; }
+  .target-note{
+    font-weight:400;
+    font-size:0.85rem;
+    color:var(--ink-soft);
+  }
+
+  .stat-row .k{ color:var(--ink-soft);  letter-spacing:0.01em; font-size:0.95rem; align-self:center;}
+  .stat-row .v{ font-weight:400; font-size:1.15rem; font-family:var(--sans); }
+
+  .gauge-divider{
+    border:none;
+    border-top:1px solid var(--rule);
+    margin:20px 0 0;
+  }
+
+  .section-label{
+    font-weight:400;
+    letter-spacing:0.02em;
+    font-size:1.5rem;
+    color:var(--ink-soft);
+    margin:26px 0 10px;
+  }
+
+  .legend{ font-size:0.95rem; line-height:1.9; color:var(--ink-soft); }
+  .legend .swatch{ display:inline-block; width:10px; height:10px; margin-right:6px; border-radius:1px; vertical-align:middle; }
+
+  .theme-toggle{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 8px 6px 16px;
+    border:2px solid var(--ink);
+    border-radius:999px;
+    background:transparent;
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:0.85rem;
+    font-weight:400;
+    cursor:pointer;
+    line-height:1;
+  }
+  .theme-toggle:focus-visible{
+    outline:2px solid var(--teal);
+    outline-offset:2px;
+  }
+  .theme-toggle-icon{ font-size:1rem; }
+  .theme-toggle-knob{
+    width:20px;
+    height:20px;
+    border-radius:50%;
+    background:var(--ink);
+    flex-shrink:0;
+  }
+  .toolbar{
+    display:flex; gap:14px; margin-top:18px; flex-wrap:wrap;
+  }
+  .toolbar label{
+    font-size:0.88rem; color:var(--ink-soft); display:flex; align-items:center; gap:6px; cursor:pointer;
+  }
+  .toolbar input[type=checkbox]{ accent-color:var(--teal); }
+
+  footer{
+    padding:18px 32px 40px;
+    font-family:var(--sans);
+    font-size:0.75rem;
+    color:var(--ink-soft);
+    letter-spacing:0.01em;
+  }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="title-flourish">
+    <h1>Plain Jane</h1>
+    <svg class="squiggle" viewBox="0 0 76 50" aria-hidden="true">
+      <path d="M2,25 C8,2 14,48 20,25 C26,2 32,48 38,25 C44,2 50,48 56,25 C62,2 68,48 74,25"
+            fill="none" stroke="var(--teal)" stroke-width="4" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="masthead-right">
+    <div class="sub">Helping you write in plain English</div>
+    <button type="button" id="themeToggle" class="theme-toggle" role="switch" aria-checked="false" aria-label="Switch to dark mode">
+      <span class="theme-toggle-icon" id="themeIcon" aria-hidden="true">&#9728;</span>
+      <span id="themeLabel">Light</span>
+      <span class="theme-toggle-knob"></span>
+    </button>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="editor-wrap">
+    <div class="format-toolbar">
+      <button type="button" id="bulletBtn" class="format-btn" aria-label="Bulleted list" aria-pressed="false" title="Bulleted list">&#8226;</button>
+      <button type="button" id="numberedBtn" class="format-btn" aria-label="Numbered list" aria-pressed="false" title="Numbered list">1.</button>
+    </div>
+    <div class="editor-stack">
+      <div id="statsLiveRegion" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+    <div id="editorHighlight" aria-hidden="true"></div>
+      <textarea id="editorInput" aria-label="Writing editor" placeholder="Plain Jane checks your writing against Flesch-Kincaid readability scores. It highlights hard sentences, adverbs and passive voice as you type. Use the toolbar above for bulleted or numbered lists." spellcheck="true"></textarea>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="gauge">
+      <svg viewBox="0 0 200 110">
+        <path d="M 15 100 A 85 85 0 0 1 185 100" fill="none" stroke="var(--rule)" stroke-width="14" stroke-linecap="round"/>
+        <path id="gaugeArc" d="M 15 100 A 85 85 0 0 1 185 100" fill="none" stroke="var(--teal)" stroke-width="14" stroke-linecap="round" stroke-dasharray="267" stroke-dashoffset="267"/>
+        <line x1="144.7" y1="38.5" x2="155.3" y2="24" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round"/>
+        <text x="158" y="22" font-size="10" fill="var(--ink-soft)" font-family="Arial, sans-serif">target 70</text>
+      </svg>
+    </div>
+    <div class="gauge-label">
+      <div class="gauge-grade" id="easeScore">—</div>
+      <div class="gauge-caption" id="easeCaption">Reading ease</div>
+    </div>
+
+    <hr class="gauge-divider">
+
+    <h2 class="section-label">Readability</h2>
+    <div class="stat-row"><span class="k">Reading ease <span class="target-note">(target 70+)</span></span><span class="v" id="ease">—</span></div>
+    <div class="stat-row"><span class="k">Grade level <span class="target-note" id="gradeTargetNote">(target ≤8)</span></span><span class="v" id="gradeStat">—</span></div>
+
+    <h2 class="section-label">Word and sentence counts</h2>
+    <div class="stat-row"><span class="k">Words</span><span class="v" id="words">0</span></div>
+    <div class="stat-row"><span class="k">Sentences</span><span class="v" id="sentences">0</span></div>
+    <div class="stat-row"><span class="k">Average words in each sentence</span><span class="v" id="wps">0</span></div>
+    <div class="stat-row"><span class="k">Hard to read sentences</span><span class="v" id="hardCount">0</span></div>
+    <div class="stat-row"><span class="k">Very hard to read sentences</span><span class="v" id="veryHardCount">0</span></div>
+    <div class="stat-row"><span class="k">Adverbs</span><span class="v" id="adverbCount">0</span></div>
+    <div class="stat-row"><span class="k">Passive voice</span><span class="v" id="passiveCount">0</span></div>
+
+    <h2 class="section-label">Highlight key</h2>
+    <div class="legend">
+      <div><span class="swatch" style="border-bottom:2px solid var(--amber); background:none; height:0; width:14px;"></span>hard to read (2+ grades above target)</div>
+      <div><span class="swatch" style="border-bottom:2px solid var(--red); background:none; height:0; width:14px;"></span>very hard (4+ grades above target)</div>
+      <div><span class="swatch" style="background:var(--adverb-bg);"></span>adverb</div>
+      <div><span class="swatch" style="border-bottom:2px dotted var(--teal); background:none; height:0; width:14px;"></span>passive voice</div>
+    </div>
+
+    <div class="toolbar">
+      <label><input type="checkbox" id="toggleLength" checked> sentence length</label>
+      <label><input type="checkbox" id="toggleAdverb" checked> adverbs</label>
+      <label><input type="checkbox" id="togglePassive" checked> passive voice</label>
+    </div>
+    <div class="toolbar" style="margin-top:10px;">
+      <label>target grade <input type="number" id="targetGrade" value="8" min="1" max="16" step="1" style="width:52px; font-family:var(--sans); font-size:0.9rem;"></label>
+    </div>
+  </div>
+</div>
+
+<footer>All scoring runs locally in your browser. Nothing is sent anywhere.</footer>
+
+<script>
+const editorInput = document.getElementById('editorInput');
+const editorHighlight = document.getElementById('editorHighlight');
+const gaugeArc = document.getElementById('gaugeArc');
+const ARC_LENGTH = 267;
+
+const toggles = {
+  length: document.getElementById('toggleLength'),
+  adverb: document.getElementById('toggleAdverb'),
+  passive: document.getElementById('togglePassive'),
+};
+const targetGradeInput = document.getElementById('targetGrade');
+function getTargetGrade(){
+  const v = parseFloat(targetGradeInput.value);
+  return isNaN(v) ? 8 : v;
+}
+
+function countSyllables(word){
+  word = word.toLowerCase().replace(/[^a-z]/g, '');
+  if(word.length === 0) return 0;
+  if(word.length <= 3) return 1;
+  word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
+  word = word.replace(/^y/, '');
+  const matches = word.match(/[aeiouy]{1,2}/g);
+  return matches ? matches.length : 1;
+}
+
+function splitSentences(text){
+  const clean = text.replace(/\s+/g, ' ').trim();
+  if(!clean) return [];
+  // protect decimal numbers (e.g. "5.6") so they aren't mistaken for sentence-ending periods
+  const protectedText = clean.replace(/(\d)\.(\d)/g, '$1\u0001$2');
+  // split, keeping the punctuation attached to the sentence it ends
+  const parts = protectedText.split(/([.!?]+\s*)/);
+  const sentences = [];
+  for(let i = 0; i < parts.length; i += 2){
+    const chunk = (parts[i] || '') + (parts[i + 1] || '');
+    if(chunk.trim()) sentences.push(chunk.trim().replace(/\u0001/g, '.'));
+  }
+  return sentences;
+}
+
+const ADVERB_RE = /\b(\w+ly)\b/gi;
+const ADVERB_EXCLUDE = new Set(['family','only','early','likely','friendly','lonely','ugly','holy','italy','rally','supply','apply','reply','imply','ally','belly','bully','fully','folly','jolly','silly','sully','tally']);
+const PASSIVE_IRREGULAR = 'built|sent|kept|left|spent|meant|felt|dealt|spelt|burnt|learnt|bent|lent|shown|known|given|taken|written|broken|spoken|driven|chosen|frozen|stolen|worn|torn|born|done|gone|said|made|held|told|sold|found|bought|caught|brought|thought|taught|fought|sought|understood|stood|put|set|cut|hit|hurt|cost|shut|run|come|become|seen|heard|lost|led|read|paid|laid|hung|sung|rung|swung|struck|stuck';
+const PASSIVE_RE = new RegExp('\\b(am|is|are|was|were|be|been|being)\\b\\s+(\\w+(?:ed|en)|' + PASSIVE_IRREGULAR + ')\\b', 'gi');
+const PASSIVE_EXCLUDE = new Set(['often','open','even','chicken','kitchen','happen','listen','sudden','golden','wooden','seven','eleven','when','then','ten']);
+
+function sentenceGrade(sentence){
+  const words = (sentence.match(/[A-Za-z']+/g) || []);
+  if(words.length === 0) return 0;
+  let syllables = 0;
+  words.forEach(w => syllables += countSyllables(w));
+  const syllablesPerWord = syllables / words.length;
+  // treat the sentence as a one-sentence document for FK grade purposes
+  return (0.39 * words.length) + (11.8 * syllablesPerWord) - 15.59;
+}
+
+function analyze(text){
+  const sentences = text.split('\n').flatMap(line => splitSentences(line));
+  const wordsArr = (text.match(/[A-Za-z']+/g) || []);
+  const wordCount = wordsArr.length;
+  const sentenceCount = sentences.length || 1;
+  let syllableTotal = 0;
+  wordsArr.forEach(w => syllableTotal += countSyllables(w));
+
+  const wordsPerSentence = wordCount / sentenceCount;
+  const syllablesPerWord = wordCount ? syllableTotal / wordCount : 0;
+
+  const ease = 206.835 - (1.015 * wordsPerSentence) - (84.6 * syllablesPerWord);
+  const grade = (0.39 * wordsPerSentence) + (11.8 * syllablesPerWord) - 15.59;
+
+  const adverbMatches = (text.match(ADVERB_RE) || []).filter(w => !ADVERB_EXCLUDE.has(w.toLowerCase()));
+  const passiveMatches = (text.match(PASSIVE_RE) || []).filter(m => {
+    const lastWord = m.trim().split(/\s+/).pop().toLowerCase();
+    return !PASSIVE_EXCLUDE.has(lastWord);
+  });
+
+  const target = getTargetGrade();
+  let hard = 0, veryHard = 0;
+  sentences.forEach(s => {
+    const wordCountInSentence = (s.match(/[A-Za-z']+/g) || []).length;
+    if(wordCountInSentence < 4) return; // FK grade is unreliable on fragments this short
+    const g = sentenceGrade(s);
+    if(g >= target + 4) veryHard++;
+    else if(g >= target + 2) hard++;
+  });
+
+  return {
+    sentences, wordCount, sentenceCount: sentences.length,
+    wordsPerSentence, ease, grade,
+    adverbCount: adverbMatches.length, passiveCount: passiveMatches.length,
+    hard, veryHard
+  };
+}
+
+function escapeHtml(str){
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function highlightSentence(sentence){
+  const target = getTargetGrade();
+  const wordCountInSentence = (sentence.match(/[A-Za-z']+/g) || []).length;
+  const g = wordCountInSentence >= 4 ? sentenceGrade(sentence) : -Infinity;
+  let wrapClass = null;
+  if(toggles.length.checked){
+    if(g >= target + 4) wrapClass = 'very-hard';
+    else if(g >= target + 2) wrapClass = 'hard';
+  }
+
+  let html = escapeHtml(sentence);
+
+  if(toggles.passive.checked){
+    html = html.replace(PASSIVE_RE, m => {
+      const lastWord = m.trim().split(/\s+/).pop().toLowerCase();
+      if(PASSIVE_EXCLUDE.has(lastWord)) return m;
+      return `<mark class="passive">${m}</mark>`;
+    });
+  }
+  if(toggles.adverb.checked){
+    html = html.replace(ADVERB_RE, m => {
+      if(ADVERB_EXCLUDE.has(m.toLowerCase())) return m;
+      return `<mark class="adverb">${m}</mark>`;
+    });
+  }
+
+  if(wrapClass){
+    return `<span class="${wrapClass === 'very-hard' ? 'very-hard-wrap' : 'hard-wrap'}"><mark class="${wrapClass}">${html}</mark></span>`;
+  }
+  return html;
+}
+
+function updateStats(a){
+  document.getElementById('words').textContent = a.wordCount;
+  document.getElementById('sentences').textContent = a.sentenceCount;
+  document.getElementById('wps').textContent = a.wordCount ? a.wordsPerSentence.toFixed(1) : '0';
+  document.getElementById('hardCount').textContent = a.hard;
+  document.getElementById('veryHardCount').textContent = a.veryHard;
+  document.getElementById('adverbCount').textContent = a.adverbCount;
+  document.getElementById('passiveCount').textContent = a.passiveCount;
+
+  const easeRaw = a.wordCount ? a.ease : null;
+  const easeVal = a.wordCount ? Math.max(0, Math.min(100, a.ease)) : null;
+  const gradeVal = a.wordCount ? Math.max(0, a.grade) : null;
+
+  document.getElementById('ease').textContent = easeRaw !== null ? easeRaw.toFixed(1) : '—';
+  document.getElementById('gradeStat').textContent = gradeVal !== null ? gradeVal.toFixed(1) : '—';
+  document.getElementById('gradeTargetNote').textContent = '(target \u2264' + getTargetGrade() + ')';
+  document.getElementById('easeScore').textContent = easeRaw !== null ? easeRaw.toFixed(1) : '—';
+
+  let caption = 'Reading ease';
+  if(easeVal !== null){
+    if(easeVal >= 70) caption = 'Reading ease — clear';
+    else if(easeVal >= 50) caption = 'Reading ease — moderate';
+    else caption = 'Reading ease — dense';
+  }
+  document.getElementById('easeCaption').textContent = caption;
+
+  // gauge fill now tracks reading ease directly — matches the number shown underneath it.
+  // Higher ease = better = more of the arc filled, teal -> amber -> red as it drops.
+  const clamped = easeVal === null ? 0 : easeVal;
+  const fraction = clamped / 100;
+  gaugeArc.setAttribute('stroke-dashoffset', ARC_LENGTH - (ARC_LENGTH * fraction));
+  const rootStyle = getComputedStyle(document.documentElement);
+  let color = rootStyle.getPropertyValue('--teal').trim();
+  if(clamped < 50) color = rootStyle.getPropertyValue('--red').trim();
+  else if(clamped < 70) color = rootStyle.getPropertyValue('--amber').trim();
+  gaugeArc.setAttribute('stroke', color);
+}
+
+function cleanMarkdown(text){
+  let clean = text;
+  // markdown links [text](url) -> text (readers never see the URL itself)
+  clean = clean.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+  // bare URLs a reader wouldn't read as prose
+  clean = clean.replace(/https?:\/\/[^\s)]+/g, '');
+  // bullet / numbered list markers at the start of a line
+  clean = clean.replace(/^[ \t]*[-*+][ \t]+/gm, '');
+  clean = clean.replace(/^[ \t]*\d+\.[ \t]+/gm, '');
+  // headers
+  clean = clean.replace(/^#{1,6}[ \t]+/gm, '');
+  // strikethrough text is marked for deletion — exclude it entirely, not just its markers
+  clean = clean.replace(/~~([^~]+)~~/g, '');
+  // bold / italic / inline code markers, keeping the wrapped text
+  clean = clean.replace(/\*\*\*([^*]+)\*\*\*/g, '$1');
+  clean = clean.replace(/\*\*([^*]+)\*\*/g, '$1');
+  clean = clean.replace(/\*([^*]+)\*/g, '$1');
+  clean = clean.replace(/_([^_]+)_/g, '$1');
+  clean = clean.replace(/`([^`]+)`/g, '$1');
+  return clean;
+}
+
+function parseLine(line){
+  let m;
+  if((m = line.match(/^(#{1,2})\s+(.*)$/))){
+    return { type: m[1].length === 1 ? 'h1' : 'h2', content: m[2] };
+  }
+  if((m = line.match(/^[-*]\s+(.*)$/))){
+    return { type: 'ul', content: m[1] };
+  }
+  if((m = line.match(/^(\d+)\.\s+(.*)$/))){
+    return { type: 'ol', content: m[2], number: m[1] };
+  }
+  if((m = line.match(/^>\s+(.*)$/))){
+    return { type: 'quote', content: m[1] };
+  }
+  return { type: 'p', content: line };
+}
+
+const INLINE_RE = /\[([^\]]+)\]\(([^)]+)\)|`([^`]+)`|\*\*\*([^*]+)\*\*\*|\*\*([^*]+)\*\*|~~([^~]+)~~|\*([^*]+)\*/g;
+
+function parseInline(content){
+  const tokens = [];
+  let lastIndex = 0;
+  let match;
+  INLINE_RE.lastIndex = 0;
+  while((match = INLINE_RE.exec(content)) !== null){
+    if(match.index > lastIndex){
+      tokens.push({ text: content.slice(lastIndex, match.index), format: null });
+    }
+    if(match[1] !== undefined){
+      tokens.push({ text: match[1], format: 'link', url: match[2] });
+    } else if(match[3] !== undefined){
+      tokens.push({ text: match[3], format: 'code' });
+    } else if(match[4] !== undefined){
+      tokens.push({ text: match[4], format: 'bolditalic' });
+    } else if(match[5] !== undefined){
+      tokens.push({ text: match[5], format: 'bold' });
+    } else if(match[6] !== undefined){
+      tokens.push({ text: match[6], format: 'strike' });
+    } else if(match[7] !== undefined){
+      tokens.push({ text: match[7], format: 'italic' });
+    }
+    lastIndex = INLINE_RE.lastIndex;
+  }
+  if(lastIndex < content.length){
+    tokens.push({ text: content.slice(lastIndex), format: null });
+  }
+  return tokens;
+}
+
+function renderPlainToken(text){
+  let html = escapeHtml(text);
+  if(toggles.passive.checked){
+    html = html.replace(PASSIVE_RE, m => {
+      const lastWord = m.trim().split(/\s+/).pop().toLowerCase();
+      if(PASSIVE_EXCLUDE.has(lastWord)) return m;
+      return `<mark class="passive">${m}</mark>`;
+    });
+  }
+  if(toggles.adverb.checked){
+    html = html.replace(ADVERB_RE, m => {
+      if(ADVERB_EXCLUDE.has(m.toLowerCase())) return m;
+      return `<mark class="adverb">${m}</mark>`;
+    });
+  }
+  return html;
+}
+
+function buildHighlightedHtml(text){
+  // process line by line so newlines line up exactly with the textarea underneath
+  return text.split('\n').map(line => {
+    const parsed = parseLine(line);
+    const tokens = parseInline(parsed.content);
+    const hasFormatting = tokens.some(t => t.format !== null);
+
+    let innerHtml;
+    if(!hasFormatting){
+      // no inline markdown on this line — use the existing, well-tested per-sentence path
+      const sentences = splitSentences(parsed.content);
+      innerHtml = sentences.map(highlightSentence).join(' ');
+    } else {
+      // line has inline formatting — treat the whole line as one unit for
+      // hard-to-read scoring (per-sentence splitting inside formatted spans
+      // gets genuinely complicated to do safely; this keeps it correct and simple)
+      const plainText = tokens.filter(t => t.format !== 'strike').map(t => t.text).join('');
+      const target = getTargetGrade();
+      const wordCountInLine = (plainText.match(/[A-Za-z']+/g) || []).length;
+      let wrapClass = null;
+      if(toggles.length.checked && wordCountInLine >= 4){
+        const g = sentenceGrade(plainText);
+        if(g >= target + 4) wrapClass = 'very-hard';
+        else if(g >= target + 2) wrapClass = 'hard';
+      }
+
+      const tokenHtml = tokens.map(t => {
+        if(t.format === null) return renderPlainToken(t.text);
+        const escaped = escapeHtml(t.text);
+        if(t.format === 'code') return `<span class="md-code">${escaped}</span>`;
+        if(t.format === 'bolditalic') return `<strong><em>${escaped}</em></strong>`;
+        if(t.format === 'bold') return `<strong>${escaped}</strong>`;
+        if(t.format === 'italic') return `<em>${escaped}</em>`;
+        if(t.format === 'strike') return `<s>${escaped}</s>`;
+        if(t.format === 'link') return `<span class="md-link">${escaped}</span>`;
+        return escaped;
+      }).join('');
+
+      innerHtml = wrapClass ? `<mark class="${wrapClass}">${tokenHtml}</mark>` : tokenHtml;
+    }
+
+    if(parsed.type === 'h1') return `<span class="md-h1">${innerHtml}</span>`;
+    if(parsed.type === 'h2') return `<span class="md-h2">${innerHtml}</span>`;
+    if(parsed.type === 'ul') return `<span class="md-bullet">&bull;</span> ${innerHtml}`;
+    if(parsed.type === 'ol') return `<span class="md-bullet">${parsed.number}.</span> ${innerHtml}`;
+    if(parsed.type === 'quote') return `<span class="md-quote-mark">&#8220;</span> <span class="md-quote">${innerHtml}</span>`;
+    return innerHtml;
+  }).join('\n');
+}
+
+function autosize(){
+  editorInput.style.height = 'auto';
+  const h = Math.max(editorInput.scrollHeight, 1);
+  editorInput.style.height = h + 'px';
+  editorHighlight.style.height = h + 'px';
+}
+
+const statsLiveRegion = document.getElementById('statsLiveRegion');
+let announceTimer;
+
+function announceStats(a){
+  clearTimeout(announceTimer);
+  announceTimer = setTimeout(() => {
+    if(a.wordCount === 0){
+      statsLiveRegion.textContent = '';
+      return;
+    }
+    const easeVal = Math.max(0, Math.min(100, a.ease));
+    const parts = [
+      `Reading ease ${easeVal.toFixed(0)}`,
+      `grade level ${Math.max(0, a.grade).toFixed(0)}`,
+    ];
+    const flags = [];
+    if(a.hard > 0) flags.push(`${a.hard} hard to read sentence${a.hard === 1 ? '' : 's'}`);
+    if(a.veryHard > 0) flags.push(`${a.veryHard} very hard to read sentence${a.veryHard === 1 ? '' : 's'}`);
+    if(flags.length) parts.push(flags.join(', '));
+    statsLiveRegion.textContent = parts.join('. ') + '.';
+  }, 1500);
+}
+
+function render(){
+  const rawText = editorInput.value;
+  const cleanedText = cleanMarkdown(rawText);
+  const a = analyze(cleanedText);
+  updateStats(a);
+  announceStats(a);
+  editorHighlight.innerHTML = buildHighlightedHtml(rawText) + (rawText.endsWith('\n') ? '&nbsp;' : '');
+  autosize();
+}
+
+// formatting toolbar
+const bulletBtn = document.getElementById('bulletBtn');
+const numberedBtn = document.getElementById('numberedBtn');
+
+function currentLineBounds(){
+  const value = editorInput.value;
+  const start = editorInput.selectionStart;
+  const end = editorInput.selectionEnd;
+  const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+  const nextBreak = value.indexOf('\n', end);
+  const lineEnd = nextBreak === -1 ? value.length : nextBreak;
+  return { lineStart, lineEnd };
+}
+
+function stripBlockPrefix(line){
+  return line.replace(/^(#{1,6}\s+|[-*]\s+|\d+\.\s+|>\s+)/, '');
+}
+
+function applyBlockType(type){
+  const { lineStart, lineEnd } = currentLineBounds();
+  const value = editorInput.value;
+  const block = value.slice(lineStart, lineEnd);
+  const lines = block.split('\n');
+
+  let newLines;
+  if(type === 'p') newLines = lines.map(stripBlockPrefix);
+  else if(type === 'ul') newLines = lines.map(l => '- ' + stripBlockPrefix(l));
+  else if(type === 'ol') newLines = lines.map((l, i) => (i + 1) + '. ' + stripBlockPrefix(l));
+  else if(type === 'quote') newLines = lines.map(l => '> ' + stripBlockPrefix(l));
+  else newLines = lines;
+
+  const newBlock = newLines.join('\n');
+  editorInput.focus();
+  editorInput.setSelectionRange(lineStart, lineEnd);
+  document.execCommand('insertText', false, newBlock);
+  editorInput.setSelectionRange(lineStart + newBlock.length, lineStart + newBlock.length);
+  render();
+  syncFormatButtons();
+}
+
+function toggleBlockType(type){
+  const { lineStart, lineEnd } = currentLineBounds();
+  const block = editorInput.value.slice(lineStart, lineEnd);
+  const firstLine = block.split('\n')[0];
+  const parsed = parseLine(firstLine);
+  applyBlockType(parsed.type === type ? 'p' : type);
+}
+
+bulletBtn.addEventListener('click', () => toggleBlockType('ul'));
+numberedBtn.addEventListener('click', () => toggleBlockType('ol'));
+
+function syncFormatButtons(){
+  const { lineStart, lineEnd } = currentLineBounds();
+  const block = editorInput.value.slice(lineStart, lineEnd);
+  const firstLine = block.split('\n')[0];
+  const parsed = parseLine(firstLine);
+  const isBullet = parsed.type === 'ul';
+  const isNumbered = parsed.type === 'ol';
+  bulletBtn.classList.toggle('active', isBullet);
+  bulletBtn.setAttribute('aria-pressed', isBullet);
+  numberedBtn.classList.toggle('active', isNumbered);
+  numberedBtn.setAttribute('aria-pressed', isNumbered);
+}
+editorInput.addEventListener('click', syncFormatButtons);
+editorInput.addEventListener('keyup', syncFormatButtons);
 
 
-target 70
-—
-Reading ease
+editorInput.addEventListener('keydown', (e) => {
+  if(e.key !== 'Enter' || e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) return;
+  if(editorInput.selectionStart !== editorInput.selectionEnd) return;
 
-Readability
-Reading ease (target 70+)
-—
-Grade level (target ≤8)
-—
-Word and sentence counts
-Words
-0
-Sentences
-0
-Average words in each sentence
-0
-Hard to read sentences
-0
-Very hard to read sentences
-0
-Adverbs
-0
-Passive voice
-0
-Highlight key
-hard to read (2+ grades above target)
-very hard (4+ grades above target)
-adverb
-passive voice
+  const { lineStart, lineEnd } = currentLineBounds();
+  const line = editorInput.value.slice(lineStart, lineEnd);
+  const parsed = parseLine(line);
+  if(parsed.type !== 'ul' && parsed.type !== 'ol') return;
 
-sentence length
+  e.preventDefault();
 
-adverbs
+  if(parsed.content.trim() === ''){
+    // empty list item - exit the list rather than adding another empty bullet
+    editorInput.focus();
+    editorInput.setSelectionRange(lineStart, lineEnd);
+    document.execCommand('delete', false, null);
+    editorInput.setSelectionRange(lineStart, lineStart);
+    render();
+    syncFormatButtons();
+    return;
+  }
 
-passive voice target grade
+  const cursor = editorInput.selectionStart;
+  const prefix = parsed.type === 'ul' ? '- ' : (parseInt(parsed.number, 10) + 1) + '. ';
+  editorInput.focus();
+  editorInput.setSelectionRange(cursor, cursor);
+  document.execCommand('insertText', false, '\n' + prefix);
+  render();
+  syncFormatButtons();
+});
 
-All scoring runs locally in your browser. Nothing is sent anywhere.
+editorInput.addEventListener('input', render);
+editorInput.addEventListener('scroll', () => {
+  editorHighlight.scrollTop = editorInput.scrollTop;
+  editorHighlight.scrollLeft = editorInput.scrollLeft;
+});
+
+let debounceTimer;
+
+Object.values(toggles).forEach(t => t.addEventListener('change', render));
+targetGradeInput.addEventListener('change', render);
+targetGradeInput.addEventListener('input', () => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(render, 400);
+});
+
+// theme toggle
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = document.getElementById('themeIcon');
+const themeLabel = document.getElementById('themeLabel');
+const SUN = '\u2600';
+const MOON = '\u263D';
+
+function applyTheme(isDark){
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  themeToggle.setAttribute('aria-checked', isDark ? 'true' : 'false');
+  themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+  themeIcon.textContent = isDark ? MOON : SUN;
+  themeLabel.textContent = isDark ? 'Dark' : 'Light';
+  render(); // gauge colors are read live from CSS variables, so re-render to pick up the new theme
+}
+
+themeToggle.addEventListener('click', () => {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  applyTheme(!isDark);
+});
+
+const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+applyTheme(prefersDark);
+</script>
+
+</body>
+</html>
